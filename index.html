@@ -118,6 +118,7 @@ body{font-family:'Circular',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,s
 .card:hover{background:#282828;}
 .card:hover .play-btn{opacity:1;transform:translateY(0);}
 .card img{width:100%;aspect-ratio:1;border-radius:4px;object-fit:cover;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+.card-info-wrap{display:contents;}
 .card-title{font-size:16px;font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;}
 .card-sub{font-size:14px;color:#b3b3b3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;}
 .play-btn{position:absolute;bottom:96px;right:20px;width:48px;height:48px;background:#1db954;border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s;box-shadow:0 8px 24px rgba(0,0,0,.6);}
@@ -215,14 +216,12 @@ body{font-family:'Circular',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,s
 .mobile-progress{display:none;position:fixed;left:0;right:0;height:4px;background:#535353;z-index:102;cursor:pointer;}
 .mobile-progress-fill{height:100%;background:#1db954;width:0%;pointer-events:none;}
 
-/* Hamburger menu for tablet */
-.hamburger-btn{display:none;position:fixed;top:16px;left:16px;z-index:200;background:none;border:none;color:#fff;cursor:pointer;padding:8px;border-radius:4px;transition:background .2s;}
+/* Hamburger menu */
+.hamburger-btn{display:none;position:fixed;top:14px;left:14px;z-index:500;background:rgba(18,18,18,.95);border:none;color:#fff;cursor:pointer;padding:10px;border-radius:50%;width:42px;height:42px;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,.6);transition:background .2s;}
+.hamburger-btn svg{width:22px;height:22px;fill:currentColor;display:block;}
 .hamburger-btn:hover{background:#282828;}
-.hamburger-btn svg{width:24px;height:24px;fill:currentColor;}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:150;opacity:0;transition:opacity .3s;}
-.sidebar-overlay.show{display:block;opacity:1;}
-.sidebar.collapsed{transform:translateX(-100%);position:fixed;z-index:160;transition:transform .3s ease-in-out;height:100vh;top:0;left:0;}
-.sidebar.collapsed.open{transform:translateX(0);}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:490;opacity:0;transition:opacity .3s;pointer-events:none;}
+.sidebar-overlay.show{opacity:1;pointer-events:auto;}
 
 /* Responsive - Spotify Style */
 @media(max-width:1024px){
@@ -232,16 +231,10 @@ body{font-family:'Circular',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,s
 }
 
 @media(max-width:768px){
-  .hamburger-btn{display:block;}
-  .sidebar{position:fixed;transform:translateX(-100%);z-index:160;height:100vh;top:0;left:0;}
+  .hamburger-btn{display:flex;}
+  .sidebar{position:fixed;top:0;left:0;height:100vh;width:280px;z-index:495;transform:translateX(-100%);transition:transform .3s ease;background:#121212;padding:24px 8px 24px 24px;}
   .sidebar.open{transform:translateX(0);}
-  .sidebar-overlay{display:block;opacity:0;pointer-events:none;}
-  .sidebar-overlay.show{opacity:1;pointer-events:auto;}
-  .sidebar{width:280px;padding:24px 8px 24px 24px;}
-  .sidebar-header{padding:0 16px 16px 8px;}
-  .nav a{padding:10px 16px;font-size:14px;}
-  .nav a svg{width:24px;height:24px;}
-  .playlist-section{padding:0 16px;}
+  .sidebar-overlay{display:block;}
   .main{padding:16px 20px 120px;border-radius:0;margin:0;}
   .main h2{font-size:24px;}
   .section-title{font-size:20px;margin:24px 0 12px;}
@@ -264,52 +257,99 @@ body{font-family:'Circular',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,s
 }
 
 @media(max-width:640px){
-  .sidebar{display:none;}
+  .hamburger-btn{display:flex;}
+  .sidebar{width:82%;max-width:300px;padding:60px 8px 24px 20px;background:#121212;}
+  .sidebar-overlay{display:block;}
   .bottom-nav{display:block;}
-  .mobile-progress{display:block;bottom:calc(64px + env(safe-area-inset-bottom,0px));}
-  .main{padding:16px 16px 160px;border-radius:0;margin:0;}
-  .main h2{font-size:24px;margin-bottom:16px;}
-  .cards{grid-template-columns:repeat(2,1fr);gap:12px;}
-  .card{padding:12px;}
-  .card img{margin-bottom:12px;}
-  .card-title{font-size:14px;}
-  .card-sub{font-size:12px;}
-  .play-btn{width:40px;height:40px;bottom:76px;right:12px;}
-  .play-btn svg{width:18px;height:18px;}
-  .section-title{font-size:18px;margin:20px 0 12px;}
-  .search-bar{margin-bottom:24px;}
-  .search-bar input{padding:10px 40px 10px 14px;font-size:14px;}
-  .search-bar button{padding:10px 24px;font-size:13px;}
-  .player{
-    height:64px;
-    padding:0 12px;
-    gap:12px;
-    grid-template-columns:1fr auto;
-    bottom:calc(56px + env(safe-area-inset-bottom,0px));
+  .app{flex-direction:column;}
+  .main{padding:12px 16px 180px;border-radius:0;margin:0;background:linear-gradient(180deg,#1a1a2e 0%,#121212 300px);}
+  .main h2{font-size:22px;font-weight:800;margin-bottom:16px;padding-left:52px;}
+
+  /* Search bar */
+  .search-bar{margin-bottom:8px;gap:8px;}
+  .search-bar input{padding:12px 16px;font-size:14px;border-radius:10px;}
+  .search-bar button{padding:12px 18px;font-size:13px;border-radius:10px;}
+
+  /* Section title */
+  .section-title{font-size:18px;margin:20px 0 10px;}
+
+  /* Featured grid - 2 col compact */
+  #featured.cards{grid-template-columns:repeat(2,1fr);gap:10px;}
+  #featured .card{padding:0;border-radius:8px;overflow:hidden;background:#181818;}
+  #featured .card img{width:100%;aspect-ratio:1;margin-bottom:0;border-radius:0;box-shadow:none;}
+  #featured .card-title{font-size:12px;font-weight:700;padding:8px 8px 2px;margin:0;}
+  #featured .card-sub{font-size:11px;color:#b3b3b3;padding:0 8px 8px;margin:0;}
+  #featured .play-btn{bottom:52px;right:8px;width:36px;height:36px;}
+  #featured .play-btn svg{width:16px;height:16px;}
+  #featured .card-menu-btn{top:6px;right:6px;}
+  #featured .now-playing-indicator{bottom:52px;left:8px;}
+
+  /* Search results - Spotify list style */
+  #results.cards{display:flex;flex-direction:column;gap:0;}
+  #results .card{
+    display:flex;flex-direction:row;align-items:center;
+    gap:12px;padding:8px 12px;
+    border-radius:0;background:transparent;
+    border-bottom:1px solid #1a1a1a;
   }
-  .player-info{gap:10px;}
-  .player-info img{width:44px;height:44px;}
-  .track-name{font-size:13px;}
-  .track-artist{font-size:11px;}
-  .player-controls{flex-direction:row;gap:8px;}
-  .player-right{display:none;}
-  .progress-row{display:none;}
-  .ctrl-btn:not(#shuffle-btn):not(#repeat-btn){display:flex;}
-  #shuffle-btn,#repeat-btn{display:none;}
-  .play-pause{width:36px;height:36px;}
-  .play-pause svg{width:14px;height:14px;}
-  .ctrl-btn svg{width:20px;height:20px;}
-  .yt-panel{bottom:calc(128px + env(safe-area-inset-bottom,0px));width:120px;right:12px;}
-  .login-card{border-radius:16px 16px 0 0;padding:32px 24px 32px;position:fixed;bottom:0;left:0;right:0;max-width:100%;margin:0;}
+  #results .card:hover{background:#1a1a1a;border-radius:8px;}
+  #results .card img{
+    width:52px;height:52px;aspect-ratio:1;
+    margin-bottom:0;flex-shrink:0;
+    border-radius:6px;box-shadow:none;
+  }
+  #results .card-info-wrap{display:flex;flex-direction:column;flex:1;min-width:0;contents:unset;}
+  #results .card .card-title{font-size:14px;font-weight:600;margin-bottom:3px;}
+  #results .card .card-sub{font-size:12px;}
+  #results .play-btn{position:static;opacity:1;transform:none;width:36px;height:36px;margin-left:auto;flex-shrink:0;box-shadow:none;background:#1db954;}
+  #results .play-btn svg{width:16px;height:16px;}
+  #results .card-menu-btn{position:static;opacity:1;background:none;width:32px;height:32px;flex-shrink:0;}
+  #results .now-playing-indicator{position:static;margin-left:auto;}
+  #results .card.now-playing .now-playing-indicator{display:flex;}
+  #results .card .card-info-wrap{flex:1;min-width:0;}
+
+  /* Player bar hidden on mobile - mini player used instead */
+  .player{display:none!important;}
+  .mobile-progress{display:none!important;}
+
+  /* Bottom nav */
+  .bottom-nav{height:calc(56px + env(safe-area-inset-bottom,0px));}
+  .bottom-nav a{font-size:10px;gap:4px;}
+  .bottom-nav a svg{width:22px;height:22px;}
+
+  /* Mini player above bottom nav */
+  .mini-player{display:flex;bottom:calc(56px + env(safe-area-inset-bottom,0px));}
+
+  /* YT panel */
+  .yt-panel{bottom:calc(120px + env(safe-area-inset-bottom,0px));width:130px;right:12px;}
+
+  /* Modals slide up */
+  .login-card{border-radius:20px 20px 0 0;padding:28px 24px 40px;position:fixed;bottom:0;left:0;right:0;max-width:100%;margin:0;}
   .login-overlay{align-items:flex-end;}
+  .share-modal{border-radius:20px 20px 0 0;padding:24px 20px 40px;position:fixed;bottom:0;left:0;right:0;max-width:100%;margin:0;}
+  .share-overlay{align-items:flex-end;}
+  .modal-card{border-radius:20px 20px 0 0;padding:24px 20px 40px;position:fixed;bottom:0;left:0;right:0;max-width:100%;margin:0;}
+  .modal-overlay{align-items:flex-end;}
+  .audio-settings-card{border-radius:20px 20px 0 0;padding:24px 20px 40px;position:fixed;bottom:0;left:0;right:0;max-width:100%;margin:0;overflow-y:auto;max-height:85vh;}
+  .audio-settings-overlay{align-items:flex-end;}
+
+  /* Queue panel slide from right on mobile */
+  .queue-panel{width:85%;max-width:340px;height:100%;top:0;right:0;bottom:auto;border-left:1px solid #282828;border-top:none;border-radius:0;transform:translateX(100%);z-index:400;}
+  .queue-panel.open{transform:translateX(0);}
+
+  /* Recent searches */
+  .recent-searches{gap:6px;}
+  .search-chip{font-size:12px;padding:6px 12px;}
+
+  /* Context menu on mobile */
+  .ctx-menu{bottom:auto;border-radius:12px;padding:4px 0;min-width:200px;}
+  .ctx-menu-item{padding:12px 16px;font-size:15px;}
 }
 
 @media(max-width:360px){
-  .cards{grid-template-columns:repeat(2,1fr);gap:10px;}
-  .card{padding:10px;}
-  .card-title{font-size:13px;}
-  .card-sub{font-size:11px;}
-  .main h2{font-size:20px;}
+  #featured.cards{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .main h2{font-size:18px;}
+  .section-title{font-size:16px;}
 }
 
 /* 3-dot context menu on cards */
@@ -618,38 +658,6 @@ body{font-family:'Circular',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,s
   </div>
   <div class="mini-player-controls" onclick="event.stopPropagation()">
     <button class="mini-play-btn" id="mini-play-btn" onclick="togglePlay()">
-      <svg id="mini-icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-      <svg id="mini-icon-pause" style="display:none" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-    </button>
-    <button class="mini-next-btn" onclick="nextTrack()">
-      <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
-    </button>
-  </div>
-  <div class="mini-progress" id="mini-progress-bar"></div>
-</div>
-
-<!-- Rename Playlist Modal -->
-<div class="modal-overlay" id="rename-playlist-overlay" onclick="handleModalOverlayClick(event,'rename-playlist-overlay')">
-  <div class="modal-card">
-    <button class="modal-close" onclick="closeModal('rename-playlist-overlay')">✕</button>
-    <div class="modal-title">Rename playlist</div>
-    <input class="modal-input" id="rename-playlist-input" maxlength="60"/>
-    <div class="modal-btn-row">
-      <button class="modal-btn secondary" onclick="closeModal('rename-playlist-overlay')">Cancel</button>
-      <button class="modal-btn primary" onclick="confirmRenamePlaylist()">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- Mini Player (mobile) -->
-<div class="mini-player" id="mini-player" onclick="expandPlayer()">
-  <img id="mini-img" src="https://picsum.photos/seed/def/200" alt=""/>
-  <div class="mini-player-info">
-    <div class="mini-player-title" id="mini-title">Search a song</div>
-    <div class="mini-player-artist" id="mini-artist">—</div>
-  </div>
-  <div class="mini-player-controls" onclick="event.stopPropagation()">
-    <button class="mini-play-btn" onclick="togglePlay()">
       <svg id="mini-icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
       <svg id="mini-icon-pause" style="display:none" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
     </button>
@@ -1232,8 +1240,10 @@ function renderCards(id, items, qKey) {
         <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
       </button>
       <img src="${t.thumb}" loading="lazy" alt="${t.title}"/>
-      <div class="card-title">${t.title}</div>
-      <div class="card-sub">${t.channel}</div>
+      <div class="card-info-wrap">
+        <div class="card-title">${t.title}</div>
+        <div class="card-sub">${t.channel}</div>
+      </div>
       <div class="now-playing-indicator"><span></span><span></span><span></span><span></span></div>
       <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
     </div>`;
@@ -1259,6 +1269,7 @@ async function selectTrack(i, qKey) {
   updateNowPlayingCards();
   updateHeartButton();
   renderQueueList();
+  updateMediaSession();
   await addToHistory(t);
   openYT(t.videoId);
 }
@@ -1287,7 +1298,7 @@ function initYTPlayer() {
   panel.style.pointerEvents = 'none';
   ytPlayer = new YT.Player('yt-player', {
     height: '100%', width: '100%',
-    playerVars: { autoplay: 1, rel: 0, modestbranding: 1, playsinline: 1, enablejsapi: 1 },
+    playerVars: { autoplay: 1, rel: 0, modestbranding: 1, playsinline: 1, enablejsapi: 1, origin: window.location.origin },
     events: {
       onReady(event) {
         ytReady = true;
@@ -1302,8 +1313,16 @@ function initYTPlayer() {
         setPlayIcon(playing);
         document.getElementById('mini-icon-play').style.display=playing?'none':'block';
         document.getElementById('mini-icon-pause').style.display=playing?'block':'none';
-        if (playing) startPoll();
-        else clearInterval(progTimer);
+        if (playing) {
+          startPoll();
+          updateMediaSession();
+          requestWakeLock();
+          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+        } else {
+          clearInterval(progTimer);
+          releaseWakeLock();
+          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+        }
         if (e.data === YT.PlayerState.ENDED) {
           if (repeatMode === 'one') {
             ytPlayer.seekTo(0);
@@ -2036,10 +2055,25 @@ window.openCtxMenu = function(e, i, qKey) {
     <div class="ctx-menu-item" onclick="ctxShare();closeCtxMenu()">
       <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>Share
     </div>`;
-  const x = Math.min(e.clientX, window.innerWidth-210);
-  const y = Math.min(e.clientY, window.innerHeight-180);
-  menu.style.left = x+'px';
-  menu.style.top = y+'px';
+  const menuWidth = 220;
+  const menuHeight = 200;
+  const x = Math.min(e.clientX, window.innerWidth - menuWidth - 10);
+  const y = Math.min(e.clientY, window.innerHeight - menuHeight - 10);
+  
+  // On mobile, position menu centered at bottom
+  if (window.innerWidth <= 640) {
+    menu.style.left = '10px';
+    menu.style.right = '10px';
+    menu.style.top = 'auto';
+    menu.style.bottom = '10px';
+    menu.style.width = 'auto';
+  } else {
+    menu.style.left = x+'px';
+    menu.style.right = 'auto';
+    menu.style.top = y+'px';
+    menu.style.bottom = 'auto';
+    menu.style.width = '';
+  }
   menu.style.display = 'block';
   setTimeout(()=>document.addEventListener('click', closeCtxMenu, {once:true}), 0);
 };
@@ -2308,6 +2342,43 @@ window.removeRecentSearch = function(q) {
   localStorage.setItem('recentSearches',JSON.stringify(recentSearches));
   showRecentSearches();
 };
+
+// ── Media Session API (lock screen controls) ─────────
+function updateMediaSession() {
+  if (!currentTrack || !('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: currentTrack.title,
+    artist: currentTrack.channel,
+    album: 'Sevenify',
+    artwork: [
+      { src: currentTrack.thumb, sizes: '480x360', type: 'image/jpeg' }
+    ]
+  });
+  navigator.mediaSession.setActionHandler('play', () => { if(ytReady) ytPlayer.playVideo(); });
+  navigator.mediaSession.setActionHandler('pause', () => { if(ytReady) ytPlayer.pauseVideo(); });
+  navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+  navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+  navigator.mediaSession.setActionHandler('seekbackward', () => { if(ytReady) ytPlayer.seekTo(Math.max(0, ytPlayer.getCurrentTime()-10), true); });
+  navigator.mediaSession.setActionHandler('seekforward', () => { if(ytReady) ytPlayer.seekTo(ytPlayer.getCurrentTime()+10, true); });
+}
+
+// ── Wake Lock (prevent screen sleep while playing) ────
+let wakeLock = null;
+async function requestWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+  } catch(e) {}
+}
+async function releaseWakeLock() {
+  if (wakeLock) { await wakeLock.release(); wakeLock = null; }
+}
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible' && ytReady) {
+    const s = ytPlayer.getPlayerState?.();
+    if (s === YT.PlayerState.PLAYING) await requestWakeLock();
+  }
+});
 
 // ── PWA ────────────────────────────────────────────────
 (function(){
