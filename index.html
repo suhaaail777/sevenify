@@ -1217,7 +1217,6 @@ function loadLocalData() {
   if (!currentUser) {
     likedSongs = JSON.parse(localStorage.getItem('likedSongs') || '[]');
     listeningHistory = JSON.parse(localStorage.getItem('listeningHistory') || '[]');
-    queues.search = JSON.parse(localStorage.getItem('searchResults') || '[]');
   }
 }
 
@@ -2131,27 +2130,16 @@ function setActiveNav(view) {
   }
 }
 
-async function searchSongs() {
-  const q = document.getElementById('search-input').value.trim();
-  if (!q) return;
-  document.getElementById('search-status').innerHTML = '<div class="spinner"><span></span><span></span><span></span></div>';
-  document.getElementById('results-label').style.display = 'none';
-  document.getElementById('results').innerHTML = '';
-  try {
-    const items = await searchITunes(q);
-    if (!items.length) { document.getElementById('search-status').innerHTML='<p class="error-msg">❌ No results found.</p>'; return; }
-    queues.search = items;
-    localStorage.setItem('searchResults', JSON.stringify(items));
-    localStorage.setItem('lastSearchQuery', q);
-    saveRecentSearch(q);
-    document.getElementById('recent-searches-container').innerHTML='';
-    document.getElementById('search-status').innerHTML = '';
-    document.getElementById('results-label').style.display = 'block';
-    renderCards('results', items, 'search');
-    document.getElementById('results-label').scrollIntoView({behavior:'smooth'});
-  } catch(e) {
-    document.getElementById('search-status').innerHTML = '<p class="error-msg">❌ Network error.</p>';
-  }
+async function searchSongs(q) {
+  document.getElementById('search-status').innerHTML='<div class="spinner"><span></span><span></span><span></span><span></span></div>';
+  document.getElementById('recent-searches-container').innerHTML='';
+  const items = await searchITunes(q);
+  if (!items.length) { document.getElementById('search-status').innerHTML='<p class="error-msg">❌ No results found.</p>'; return; }
+  queues.search = items;
+  saveRecentSearch(q);
+  document.getElementById('recent-searches-container').innerHTML='';
+  document.getElementById('search-status').innerHTML = '';
+  renderCards('results', items, 'search');
 }
 
 function showHome(e) {
@@ -2162,14 +2150,7 @@ function showHome(e) {
   document.getElementById('results').innerHTML = '';
   document.getElementById('results-label').style.display = 'none';
   document.getElementById('search-status').innerHTML = '';
-  
-  // Restore last search query if exists
-  const lastQuery = localStorage.getItem('lastSearchQuery');
-  if (lastQuery) {
-    document.getElementById('search-input').value = lastQuery;
-  } else {
-    document.getElementById('search-input').value = '';
-  }
+  document.getElementById('search-input').value = '';
   
   // Show recently played if history exists
   if (listeningHistory.length > 0) {
@@ -2658,7 +2639,22 @@ document.addEventListener('visibilitychange', async () => {
 (function(){
   const m={name:'Sevenify',short_name:'Sevenify',start_url:'./',display:'standalone',background_color:'#000',theme_color:'#1db954',icons:[{src:'applogo.png',sizes:'192x192',type:'image/png'},{src:'applogo.png',sizes:'512x512',type:'image/png'}]};
   const l=document.createElement('link'); l.rel='manifest'; l.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/json'})); document.head.appendChild(l);
-  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+  if('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      // Check for updates on page load
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // New service worker available, prompt user to reload
+            if (confirm('A new version is available. Reload to update?')) {
+              location.reload();
+            }
+          }
+        });
+      });
+    }).catch(e => console.log('SW registration failed:', e));
+  }
 })();
 
 // ── Share functionality ────────────────────────────────
