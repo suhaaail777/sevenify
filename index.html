@@ -596,7 +596,7 @@ body{font-family:'Circular',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,s
         Sevenify
       </div>
       <div class="dev-tag">Made by <span>Suhaaail</span></div>
-      <div class="dev-tag" style="margin-top:2px;">Powered by <span style="color:#fc3c44;font-weight:700;">iTunes</span></div>
+      <div class="dev-tag" style="margin-top:2px;">Powered by <span style="color:#fc3c44;font-weight:700;">iTunes</span> & <span style="color:#ff0000;font-weight:700;">YouTube</span></div>
     </div>
     <nav class="nav">
       <div class="nav-section">
@@ -793,6 +793,19 @@ body{font-family:'Circular',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,s
         <button class="audio-option-btn active" onclick="setAudioQuality('high')">High</button>
         <button class="audio-option-btn" onclick="setAudioQuality('medium')">Medium</button>
         <button class="audio-option-btn" onclick="setAudioQuality('low')">Low</button>
+      </div>
+    </div>
+
+    <!-- Audio Source -->
+    <div class="audio-section">
+      <div class="audio-section-label">Audio Source</div>
+      <div class="audio-options">
+        <button class="audio-option-btn" id="source-auto" onclick="setAudioSource('auto')">Auto</button>
+        <button class="audio-option-btn" id="source-youtube" onclick="setAudioSource('youtube')">YouTube</button>
+        <button class="audio-option-btn" id="source-itunes" onclick="setAudioSource('itunes')">iTunes</button>
+      </div>
+      <div style="font-size:11px;color:#b3b3b3;margin-top:8px;">
+        <span id="source-desc">YouTube: Full songs • iTunes: 30s previews</span>
       </div>
     </div>
 
@@ -1178,7 +1191,7 @@ let queue = [], qIdx = 0, isShuffle = false, isRepeat = false;
 let progTimer = null;
 let currentTrack = null;
 const audio = document.getElementById('audio-player');
-let audioSettings = { equalizer:'flat', bass:0, mid:0, treble:0, quality:'high', crossfade:0, offlineMode:false };
+let audioSettings = { equalizer:'flat', bass:0, mid:0, treble:0, quality:'high', crossfade:0, offlineMode:false, audioSource:'auto' };
 let repeatMode = 'off';
 let downloadedSongs = [], crossfadeTimer = null;
 let audioDevices = [], currentDeviceId = 'default';
@@ -1308,8 +1321,40 @@ async function openYT(videoId) {
   if (!currentTrack) return;
   document.getElementById('yt-modal-title').textContent = currentTrack.title;
 
-  // Try YouTube first for full song
-  if (ytReady) {
+  const source = audioSettings.audioSource;
+
+  // Force YouTube if selected
+  if (source === 'youtube' && ytReady) {
+    useYouTube = true;
+    audio.pause();
+    const ytId = currentTrack.ytVideoId || await searchYouTubeForTrack(currentTrack.title, currentTrack.channel);
+    if (ytId) {
+      currentTrack.ytVideoId = ytId;
+      document.getElementById('yt-panel').classList.add('open');
+      ytPlayer.loadVideoById({videoId:ytId, startSeconds:0});
+      return;
+    }
+  }
+
+  // Force iTunes if selected
+  if (source === 'itunes') {
+    useYouTube = false;
+    document.getElementById('yt-panel').classList.remove('open');
+    if (!currentTrack.previewUrl) {
+      try {
+        const r = await searchITunes(`${currentTrack.title} ${currentTrack.channel}`);
+        if (r[0]) { currentTrack.previewUrl=r[0].previewUrl; currentTrack.thumb=r[0].thumb; }
+      } catch(e) {}
+    }
+    if (currentTrack.previewUrl) {
+      audio.src = currentTrack.previewUrl;
+      audio.play().catch(()=>{});
+      return;
+    }
+  }
+
+  // Auto mode: Try YouTube first for full song
+  if (source === 'auto' && ytReady) {
     useYouTube = true;
     audio.pause();
     const ytId = currentTrack.ytVideoId || await searchYouTubeForTrack(currentTrack.title, currentTrack.channel);
@@ -1582,6 +1627,21 @@ function applyAudioQuality() {
   // iTunes previews are fixed quality — no adjustment needed
 }
 
+// Audio source functions
+window.setAudioSource = function(source) {
+  audioSettings.audioSource = source;
+  document.getElementById('source-auto').classList.remove('active');
+  document.getElementById('source-youtube').classList.remove('active');
+  document.getElementById('source-itunes').classList.remove('active');
+  const btn = document.getElementById(`source-${source}`);
+  if (btn) btn.classList.add('active');
+  
+  // Restart current track with new source
+  if (currentTrack) {
+    openYT(currentTrack.videoId);
+  }
+};
+
 // Crossfade functions
 window.setCrossfade = function(value) {
   audioSettings.crossfade = parseFloat(value);
@@ -1617,6 +1677,7 @@ function loadAudioSettings() {
     document.getElementById('offline-mode').checked = audioSettings.offlineMode;
     updateEQButtons();
     setAudioQuality(audioSettings.quality);
+    if (audioSettings.audioSource) setAudioSource(audioSettings.audioSource);
   }
 }
 
@@ -1974,6 +2035,7 @@ window.toggleOfflineMode = toggleOfflineMode;
 window.updateRepeatButton = updateRepeatButton;
 window.toggleDeviceDropdown = toggleDeviceDropdown;
 window.selectDevice = selectDevice;
+window.setAudioSource = setAudioSource;
 
 // ── Queue ──────────────────────────────────────────────
 let extraQueue = []; // manually added songs
