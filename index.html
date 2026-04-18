@@ -1267,24 +1267,30 @@ let likedSongs = [];
 // ── iTunes Search ──────────────────────────────────────
 async function searchITunes(q) {
   const encoded = encodeURIComponent(q);
-  const direct = `https://itunes.apple.com/search?term=${encoded}&media=music&limit=20&entity=song`;
-  const proxy  = `https://corsproxy.io/?${encodeURIComponent(direct)}`;
-  let data;
-  try {
-    const res = await fetch(direct, { signal: AbortSignal.timeout(8000) });
-    data = await res.json();
-  } catch(e) {
-    const res = await fetch(proxy, { signal: AbortSignal.timeout(10000) });
-    data = await res.json();
+  const itunesUrl = `https://itunes.apple.com/search?term=${encoded}&media=music&limit=20&entity=song`;
+  const proxies = [
+    `https://corsproxy.io/?${encodeURIComponent(itunesUrl)}`,
+    `https://api.allorigins.win/get?url=${encodeURIComponent(itunesUrl)}`,
+    itunesUrl
+  ];
+  for (const url of proxies) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      let data = await res.json();
+      if (data.contents) data = JSON.parse(data.contents);
+      if (data.results?.length) {
+        return data.results.map(t => ({
+          title: t.trackName,
+          channel: t.artistName,
+          videoId: String(t.trackId),
+          thumb: t.artworkUrl100.replace('100x100','600x600'),
+          previewUrl: t.previewUrl,
+          itunesId: String(t.trackId)
+        })).filter(t => t.previewUrl);
+      }
+    } catch(e) { continue; }
   }
-  return data.results.map(t => ({
-    title: t.trackName,
-    channel: t.artistName,
-    videoId: String(t.trackId),
-    thumb: t.artworkUrl100.replace('100x100','600x600'),
-    previewUrl: t.previewUrl,
-    itunesId: String(t.trackId)
-  })).filter(t => t.previewUrl);
+  return [];
 }
 
 // ── YouTube search for full song ───────────────────────
@@ -2162,9 +2168,7 @@ async function searchSongs(q) {
     document.getElementById('search-status').innerHTML = '';
     renderCards('results', items, 'search');
   } catch(e) {
-    document.getElementById('search-status').innerHTML = e.name === 'AbortError'
-      ? '<p class="error-msg">⏱️ Search timed out. Check your connection.</p>'
-      : '<p class="error-msg">❌ Search failed. Try again.</p>';
+    document.getElementById('search-status').innerHTML = `<p class="error-msg">❌ ${e.name}: ${e.message}</p>`;
   }
 }
 
