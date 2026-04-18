@@ -1265,7 +1265,35 @@ let audioDevices = [], currentDeviceId = 'default';
 let likedSongs = [];
 
 // ── iTunes Search ──────────────────────────────────────
+function itunesJsonp(q) {
+  return new Promise((resolve) => {
+    const cb = 'itcb_' + Date.now();
+    const s = document.createElement('script');
+    const timer = setTimeout(() => { delete window[cb]; s.remove(); resolve(null); }, 8000);
+    window[cb] = (data) => { clearTimeout(timer); delete window[cb]; s.remove(); resolve(data); };
+    s.src = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&limit=20&entity=song&callback=${cb}`;
+    s.onerror = () => { clearTimeout(timer); delete window[cb]; s.remove(); resolve(null); };
+    document.head.appendChild(s);
+  });
+}
+
 async function searchITunes(q) {
+  // Try JSONP first (works on all mobile browsers, bypasses CORS)
+  try {
+    const data = await itunesJsonp(q);
+    if (data?.results?.length) {
+      return data.results.map(t => ({
+        title: t.trackName,
+        channel: t.artistName,
+        videoId: String(t.trackId),
+        thumb: t.artworkUrl100.replace('100x100','600x600'),
+        previewUrl: t.previewUrl,
+        itunesId: String(t.trackId)
+      })).filter(t => t.previewUrl);
+    }
+  } catch(e) {}
+
+  // Fallback: fetch with proxies
   const encoded = encodeURIComponent(q);
   const itunesUrl = `https://itunes.apple.com/search?term=${encoded}&media=music&limit=20&entity=song`;
   const proxies = [
@@ -1279,9 +1307,7 @@ async function searchITunes(q) {
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch(e) { continue; }
-      if (data.contents) {
-        try { data = JSON.parse(data.contents); } catch(e) { continue; }
-      }
+      if (data.contents) { try { data = JSON.parse(data.contents); } catch(e) { continue; } }
       if (!data.results) continue;
       return data.results.map(t => ({
         title: t.trackName,
